@@ -42,6 +42,7 @@ CSG generate(){
 					.movex(centerToX_EdgeValue)
 					.toZMin()
 					.union(wings)
+					.difference(new Cylinder(shaftDiameterValue/2,bodyZValue).toCSG())
 	return part
 		.setParameter(size)
 		.setRegenerate({generate()})
