@@ -5,6 +5,8 @@ CSG generate(){
 		args=["AMT102_V"]
 	// The variable that stores the current size of this vitamin
 	StringParameter size = new StringParameter(	type+" Default",args.get(0),Vitamins.listVitaminSizes(type))
+	LengthParameter boltLength		= new LengthParameter("Bolt Length",10,[180,10])
+	boltLength.setMM(10)
 	HashMap<String,Object> measurments = Vitamins.getConfiguration( type,size.getStrValue())
 
 	def bodyZValue = measurments.bodyZ
@@ -12,7 +14,7 @@ CSG generate(){
 	def centerToX_EdgeValue = measurments.centerToX_Edge
 	def wingsZValue = measurments.wingsZ
 	def wingsYValue = measurments.wingsY
-	def boltSizeValue = measurments.boltSize
+	String boltSizeValue = measurments.boltSize
 	def wingsXValue = measurments.wingsX
 	def bodyXValue = measurments.bodyX
 	def shaftDiameterValue = measurments.shaftDiameter
@@ -27,10 +29,21 @@ CSG generate(){
 	println "Measurment bodyXValue =  "+bodyXValue
 	println "Measurment shaftDiameterValue =  "+shaftDiameterValue
 	println "Measurment bodyYValue =  "+bodyYValue
-	// Stub of a CAD object
-	CSG part = new Cube().toCSG()
+	CSG vitamin_capScrew_M25 = Vitamins.get("capScrew", boltSizeValue)
+							.movez(wingsZValue)
+
+	CSG wings = new Cube(wingsXValue,wingsYValue,wingsZValue).toCSG()
+					.toZMin()
+					.union(vitamin_capScrew_M25.movey(diameterOfWingsBoltHoleValue/2))
+					.union(vitamin_capScrew_M25.movey(-diameterOfWingsBoltHoleValue/2))
+			
+	CSG part = new Cube(bodyXValue,bodyYValue,bodyZValue).toCSG()
+					.toXMax()
+					.movex(centerToX_EdgeValue)
+					.toZMin()
+					.union(wings)
 	return part
 		.setParameter(size)
 		.setRegenerate({generate()})
 }
-return generate() 
+return generate()
